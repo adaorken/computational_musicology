@@ -12,7 +12,8 @@ output: html_document
   To discover what makes 90's pop so unique and different, let's compare some features of 90's to the rest of the corpus. Below, you see the distribution of energy, danceability and valence in 90's songs and in the rest of the Turkish pop. 
   
  
-```{r echo = FALSE}
+```{r echo = FALSE }
+
 library(spotifyr)
 library(tidyverse)
 
@@ -107,6 +108,7 @@ turkish_pop_all_by_features %>%
   )
 
 ```
+  
   This graph shows us an interaction between danceability and valence of 90's songs. More positive songs are more danceable. The same interaction is not observed in the rest of the corpus. A second observation is that there are more major scale songs in the general Turkish pop compared to the 90s. 
   
   Our first investigation is already giving us clues about why 90's Turkish pop was special and different than the rest of the Turkish pop. Song were more **positive** and more **danceable** in general and as their danceability increased their positive valence also increased.
