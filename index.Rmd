@@ -12,7 +12,7 @@ output: html_document
   To discover what makes 90's pop so unique and different, let's compare some features of 90's to the rest of the corpus. Below, you see the distribution of energy, danceability and valence in 90's songs and in the rest of the Turkish pop. 
   
  
-```{r echo = FALSE }
+```{r echo = FALSE, message = FALSE }
 
 library(spotifyr)
 library(tidyverse)
