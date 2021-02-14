@@ -1,13 +1,113 @@
 ---
 title: "Computational Musicology Portfolio"
 author: "Ada Örken"
-date: "2/8/2021"
+date: "2/14/2021"
 output: html_document
 ---
 ## Introduction to My Corpus
-  My corpus is Turkish Pop songs based on a playlist created by me by extracting pop songs from Spotify playlists of Turkish 80s, Turkish 90s, Turkish 2000s and Turkish 2010s. I would like to compare 90's Turkish pop songs first to older songs and second to newer songs. I don't want to treat 80s songs and 2000s songs as the same group because they also highly differ. This is an interesting comparison because 90's songs are highly distinguishable by their general sound. A person who is familiar with 90's Turkish pop can easily guess whether a Turkish pop song is from 90's or not. People sometimes say "sounds 90's like" to descibe new music which shows that there is a common charactersitics of this corpus. Another aspect which makes these comparisons interesting is the increasing populairty of the 90's Turkish pop songs. These songs are more popular today than they were 20 years ago, although more recent or older songs do not show the same pattern of popularity. For example 80's songs did not regain their popularity 20 years after their release. I would like to understand what makes 90's songs different. 
+  My corpus is a selection of Turkish pop songs. It consists of 50 pop songs from 90's and 50 pop songs randomly chosen from a pool of 150 pop songs equally representing 80's, 2000's and 2010's. The aim is to compare 90's Turkish pop to the rest of the corpus. This is an interesting comparison because 90's songs are highly distinguishable by their general sound. A person who is familiar with 90's Turkish pop can easily guess whether a Turkish pop song is from 90's or not. People sometimes say "sounds 90's like" to describe new music which shows that there are common characteristics of this corpus. Another aspect which makes this comparison interesting is the increasing popularity of the 90's Turkish pop songs. These songs are more popular today than they were 20 years ago, although more recent or older songs do not show the same pattern of popularity. For example 80's songs did not regain their popularity 20 years after their release. I would like to understand what makes 90's songs different. 
   
-  I think my corpus is highly representative of the groups that I want to compare in terms of time periods. One limitation of my corpus is that it is based on my personal opinion about what makes a song a pop song since I hand-picked songs from Spotify's period playlists. Altough, I am also highly expereinced in Turkish music and made my decisions based on artits' self identification or general public opinions about genres. 
+### Energy, Danceability, Valence and Mode in 90's Turkish Pop vs Turkish Pop
   
-  Pop songs are usually fast in tempo and danceable. Therefore, I think slow tempo songs like "Gitme Kal Bu Şehirde" by Nazan Öncel from 90's or "Mesafe" by Serdar Ortaç from 2000s are atypical tracks. Other than the tempo which makes some of the songs atypical, I don't think there is another feature which makes some of the songs more typical than others. I am not able to distinguish a song for being extremely typical than the others at this stage. 
+  To discover what makes 90's pop so unique and different, let's compare some features of 90's to the rest of the corpus. Below, you see the distribution of energy, danceability and valence in 90's songs and in the rest of the Turkish pop. 
+  
+ 
+```{r echo = FALSE}
+library(spotifyr)
+library(tidyverse)
 
+
+
+turkish_pop_eighties<- get_playlist_audio_features("","3COo0d0k5tbgXB35ai0dvh")
+turkish_pop_nineties<- get_playlist_audio_features("", "5b9QmdWinj5f47yUtcjuF0")
+turkish_pop_twothousands<- get_playlist_audio_features("","4RhazifKLE2G9JzzEU1KcQ")
+turkish_pop_twothousandandtens<- get_playlist_audio_features("", "0hRtOMgx3LdkpaJIJ4i2dS")
+
+turkish_pop_rest <-
+  bind_rows(
+    turkish_pop_eighties %>% mutate(decade = "80s"),
+    turkish_pop_twothousands %>% mutate(decade = "2000s"),
+    turkish_pop_twothousandandtens %>% mutate(decade = "2010s"),
+  )
+
+turkish_pop_rest_50 <- sample_n(turkish_pop_rest, 50)
+
+turkish_pop_all <-
+  bind_rows(
+   turkish_pop_rest_50 %>% mutate(category = "Rest"),
+   turkish_pop_nineties %>% mutate(decade ="90s", category = "Nineties")
+  )
+
+turkish_pop_all_by_features <- turkish_pop_all %>%
+  select(category,decade, track.name, danceability, energy, key, loudness, mode, speechiness, acousticness, instrumentalness, liveness, valence, tempo) %>%
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  )
+
+turkish_pop_all_by_features %>%
+  ggplot(aes(x = category, y = energy)) +
+  geom_violin() +
+  theme_minimal() +
+  labs(
+    x = "Decade",
+    y = "Energy"
+  )
+
+turkish_pop_all_by_features %>%
+  ggplot(aes(x = category, y = danceability)) +
+  geom_violin() +
+  theme_minimal() +
+  labs(
+    x = "Decade",
+    y = "Danceability"
+  )
+
+turkish_pop_all_by_features %>%
+  ggplot(aes(x = category, y = valence)) +
+  geom_violin() +
+  theme_minimal() +
+  labs(
+    x = "Decade",
+    y = "Valence"
+  )
+
+
+  
+```
+
+ These graphs give us some hints about why 90's were special.First of all, no wonder 90's pop parties are so popular, those songs were **danceable**! When we compare the danceability distribution of 90's to the rest of the corpus, we see that in the 90's there are no songs at the lower levels and most of the songs are piled up at higher levels of danceability while the rest of the corpus is more equally distributed.     
+ 
+ Second important observation from these graphs is that, 90's songs were more **positive in valence** when compared to the rest of the corpus. Although there were some sad, depressed and angry songs in 90's as well, the distribution is skewed to happy, cheerful and euphoric songs. 
+ 
+ In terms of energy, 90's songs look more equally distributed while the rest of the corpus is more piled up at higher energy levels. 
+ 
+ In the next graph, let's look at some interactions between these features.
+
+```{r echo = FALSE}
+turkish_pop_all_by_features %>%
+  ggplot(                    
+    aes(
+      x = valence,
+      y = danceability,
+      size = energy,
+      colour = mode
+    )
+  ) +
+  geom_point(alpha=0.5) +           
+  
+  facet_wrap(~category) +     
+  
+  theme_minimal() + 
+  scale_color_brewer(palette= "Set2") +
+  labs(                       
+    x = "Valence",
+    y = "Danceability",
+    colour = "Mode",
+    size= "Energy"
+  )
+
+```
+  This graph shows us an interaction between danceability and valence of 90's songs. More positive songs are more danceable. The same interaction is not observed in the rest of the corpus. A second observation is that there are more major scale songs in the general Turkish pop compared to the 90s. 
+  
+  Our first investigation is already giving us clues about why 90's Turkish pop was special and different than the rest of the Turkish pop. Song were more **positive** and more **danceable** in general and as their danceability increased their positive valence also increased.
+  
