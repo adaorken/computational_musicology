@@ -1,23 +1,27 @@
 ---
 title: "Computational Musicology Portfolio"
 author: "Ada Örken"
-date: "2/14/2021"
-output: html_document
+date: "Spring 2021"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: TRUE
+    theme: journal
 ---
-## Introduction to My Corpus
+### Turkish Pop 101: A quest of what makes 90's Turkish Pop special.
+ 
   My corpus is a selection of Turkish pop songs. It consists of 50 pop songs from 90's and 50 pop songs randomly chosen from a pool of 150 pop songs equally representing 80's, 2000's and 2010's. The aim is to compare 90's Turkish pop to the rest of the corpus. This is an interesting comparison because 90's songs are highly distinguishable by their general sound. A person who is familiar with 90's Turkish pop can easily guess whether a Turkish pop song is from 90's or not. People sometimes say "sounds 90's like" to describe new music which shows that there are common characteristics of this corpus. Another aspect which makes this comparison interesting is the increasing popularity of the 90's Turkish pop songs. These songs are more popular today than they were 20 years ago, although more recent or older songs do not show the same pattern of popularity. For example 80's songs did not regain their popularity 20 years after their release. I would like to understand what makes 90's songs different. 
   
-### Energy, Danceability, Valence and Mode in 90's Turkish Pop vs Turkish Pop
-  
-  To discover what makes 90's pop so unique and different, let's compare some features of 90's to the rest of the corpus. Below, you see the distribution of energy, danceability and valence in 90's songs and in the rest of the Turkish pop. 
-  
+### Let's Dance! 90's Turkish Pop is danceable and positive in valence. {data-commentary-width=300}
+
+
  
 ```{r echo = FALSE, message = FALSE }
 
 library(spotifyr)
 library(tidyverse)
-
-
+library(plotly)
+library(patchwork)
+library(compmus)
 
 turkish_pop_eighties<- get_playlist_audio_features("","3COo0d0k5tbgXB35ai0dvh")
 turkish_pop_nineties<- get_playlist_audio_features("", "5b9QmdWinj5f47yUtcjuF0")
@@ -45,53 +49,58 @@ turkish_pop_all_by_features <- turkish_pop_all %>%
     mode = ifelse(mode == 0, "Minor", "Major")
   )
 
-turkish_pop_all_by_features %>%
-  ggplot(aes(x = category, y = energy)) +
-  geom_violin() +
-  theme_minimal() +
-  labs(
-    x = "Decade",
-    y = "Energy"
-  )
+turkish_pop_all_by_features$category <- as.factor(turkish_pop_all_by_features$category)
+levels(turkish_pop_all_by_features$category) <- c("Nineties (n=50)", "Rest (n=50)")
 
-turkish_pop_all_by_features %>%
+
+danceability <- turkish_pop_all_by_features %>%
   ggplot(aes(x = category, y = danceability)) +
   geom_violin() +
   theme_minimal() +
   labs(
     x = "Decade",
     y = "Danceability"
-  )
+  ) +
+   ggtitle("Danceability of 90's Turkish Pop vs Overall Turkish Pop")+
+   theme(plot.title = element_text(size = 7))
 
-turkish_pop_all_by_features %>%
+valence <- turkish_pop_all_by_features %>%
   ggplot(aes(x = category, y = valence)) +
   geom_violin() +
   theme_minimal() +
   labs(
     x = "Decade",
     y = "Valence"
-  )
+  ) +
+  ggtitle("Valence of 90's Turkish Pop vs Overall Turkish Pop")+
+   theme(plot.title = element_text(size = 7))
 
 
-  
+danceability + valence
 ```
 
- These graphs give us some hints about why 90's were special.First of all, no wonder 90's pop parties are so popular, those songs were **danceable**! When we compare the danceability distribution of 90's to the rest of the corpus, we see that in the 90's there are no songs at the lower levels and most of the songs are piled up at higher levels of danceability while the rest of the corpus is more equally distributed.     
+
+***
+  
+To discover what makes 90's pop so unique and different, let's compare some features of 90's to the rest of the corpus. Below, you see the distribution of energy, danceability and valence in 90's songs and in the rest of the Turkish pop. 
+These graphs give us some hints about why 90's were special.First of all, no wonder 90's pop parties are so popular, those songs were **danceable**! When we compare the danceability distribution of 90's to the rest of the corpus, we see that in the 90's there are no songs at the lower levels and most of the songs are piled up at higher levels of danceability while the rest of the corpus is more equally distributed.     
+Second important observation from these graphs is that, 90's songs were more **positive in valence** when compared to the rest of the corpus. Although there were some sad, depressed and angry songs in 90's as well, the distribution is skewed to happy, cheerful and euphoric songs. 
+
  
- Second important observation from these graphs is that, 90's songs were more **positive in valence** when compared to the rest of the corpus. Although there were some sad, depressed and angry songs in 90's as well, the distribution is skewed to happy, cheerful and euphoric songs. 
  
- In terms of energy, 90's songs look more equally distributed while the rest of the corpus is more piled up at higher energy levels. 
- 
- In the next graph, let's look at some interactions between these features.
+### What about some interactions? Danceability of songs increase with the valence in the 90's. 
+
 
 ```{r echo = FALSE}
-turkish_pop_all_by_features %>%
+
+turkish_pop_interaction_graph <- turkish_pop_all_by_features %>%
   ggplot(                    
     aes(
       x = valence,
       y = danceability,
       size = energy,
-      colour = mode
+      colour = mode,
+      label= track.name
     )
   ) +
   geom_point(alpha=0.5) +           
@@ -105,11 +114,44 @@ turkish_pop_all_by_features %>%
     y = "Danceability",
     colour = "Mode",
     size= "Energy"
-  )
+  ) +
+  ggtitle("Interaction of Features in 90's Turkish Pop vs Overall Turkish Pop")
+
+ggplotly(turkish_pop_interaction_graph)
 
 ```
+***
   
+  In this graph, let's look at some interactions between these features. Move your mouse on the points to learn the song's name and more about it's features.
   This graph shows us an interaction between danceability and valence of 90's songs. More positive songs are more danceable. The same interaction is not observed in the rest of the corpus. A second observation is that there are more major scale songs in the general Turkish pop compared to the 90s. 
+   Our first investigation is already giving us clues about why 90's Turkish pop was special and different than the rest of the Turkish pop. Song were more **positive** and more **danceable** in general and as their danceability increased their positive valence also increased.
   
-  Our first investigation is already giving us clues about why 90's Turkish pop was special and different than the rest of the Turkish pop. Song were more **positive** and more **danceable** in general and as their danceability increased their positive valence also increased.
-  
+### Kal Benimle (Stay With Me): A 90's song that is neither danceable, nor positive, nor energetic.
+
+```{r}
+kal_benimle <-
+  get_tidy_audio_analysis("179Tal0hUlBUG9lorZxffT") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+kal_benimle %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c(option="magma")
+```
+
+***
+
+Emel Müftüoğlu's *Kal Benimle* from 90's looks like an outlier in terms of danceability, valence and energy; therefore it deserves further investigation. Its chromagram shows prominence of A-sharp and B in the song which suggests that the key of the song may be F-sharp major. A quick google search indicates that emotions of this key are triumph over difficulty, free sigh of relief uttered when hurdles are surmounted; echo of a soul which has fiercely struggled and finally conquered. These emotions are also represented in the lyrics of the song which tells the story of a woman who is finally escaping from this world with a sailing boat. Although very powerful, these emotions cannot easily be transfered by a happy and danceable melody, which explains why this song is an outlier in the 90's Tuskish Pop canon. 

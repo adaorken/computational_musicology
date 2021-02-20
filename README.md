@@ -6,4 +6,6 @@
   I think my corpus is highly representative of the groups that I want to compare in terms of time periods. One limitation of my corpus is that it is based on my personal opinion about what makes a song a pop song since I hand-picked songs from Spotify's period playlists. Altough, I am also highly expereinced in Turkish music and made my decisions based on artits' self identification or general public opinions about genres. 
   
   Pop songs are usually fast in tempo and danceable. Therefore, I think slow tempo songs like "Gitme Kal Bu Şehirde" by Nazan Öncel from 90's or "Mesafe" by Serdar Ortaç from 2000s are atypical tracks. Other than the tempo which makes some of the songs atypical, I don't think there is another feature which makes some of the songs more typical than others. I am not able to distinguish a song for being extremely typical than the others at this stage. 
+  
+````
  
