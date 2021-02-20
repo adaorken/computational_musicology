@@ -5,10 +5,12 @@ date: "Spring 2021"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: TRUE
-    theme: journal
+    theme: united
 ---
 ### Turkish Pop 101: A quest of what makes 90's Turkish Pop special.
  
+**What makes 90's Turkish Pop special?**
+
   My corpus is a selection of Turkish pop songs. It consists of 50 pop songs from 90's and 50 pop songs randomly chosen from a pool of 150 pop songs equally representing 80's, 2000's and 2010's. The aim is to compare 90's Turkish pop to the rest of the corpus. This is an interesting comparison because 90's songs are highly distinguishable by their general sound. A person who is familiar with 90's Turkish pop can easily guess whether a Turkish pop song is from 90's or not. People sometimes say "sounds 90's like" to describe new music which shows that there are common characteristics of this corpus. Another aspect which makes this comparison interesting is the increasing popularity of the 90's Turkish pop songs. These songs are more popular today than they were 20 years ago, although more recent or older songs do not show the same pattern of popularity. For example 80's songs did not regain their popularity 20 years after their release. I would like to understand what makes 90's songs different. 
   
 ### Let's Dance! 90's Turkish Pop is danceable and positive in valence. {data-commentary-width=300}
@@ -103,12 +105,12 @@ turkish_pop_interaction_graph <- turkish_pop_all_by_features %>%
       label= track.name
     )
   ) +
-  geom_point(alpha=0.5) +           
+  geom_point(alpha=0.7) +           
   
   facet_wrap(~category) +     
   
   theme_minimal() + 
-  scale_color_brewer(palette= "Set2") +
+ scale_color_manual(values = c("Minor" = "#FF7F50", "Major" = "#4B0082")) +
   labs(                       
     x = "Valence",
     y = "Danceability",
@@ -116,6 +118,7 @@ turkish_pop_interaction_graph <- turkish_pop_all_by_features %>%
     size= "Energy"
   ) +
   ggtitle("Interaction of Features in 90's Turkish Pop vs Overall Turkish Pop")
+  
 
 ggplotly(turkish_pop_interaction_graph)
 
