@@ -7,24 +7,219 @@ output:
     storyboard: TRUE
     theme: united
 ---
-### Turkish Pop 101: A quest of what makes 90's Turkish Pop special.
- 
-**What makes 90's Turkish Pop special?**
 
-  My corpus is a selection of Turkish pop songs. It consists of 50 pop songs from 90's and 50 pop songs randomly chosen from a pool of 150 pop songs equally representing 80's, 2000's and 2010's. The aim is to compare 90's Turkish pop to the rest of the corpus. This is an interesting comparison because 90's songs are highly distinguishable by their general sound. A person who is familiar with 90's Turkish pop can easily guess whether a Turkish pop song is from 90's or not. People sometimes say "sounds 90's like" to describe new music which shows that there are common characteristics of this corpus. Another aspect which makes this comparison interesting is the increasing popularity of the 90's Turkish pop songs. These songs are more popular today than they were 20 years ago, although more recent or older songs do not show the same pattern of popularity. For example 80's songs did not regain their popularity 20 years after their release. I would like to understand what makes 90's songs different. 
-  
-### Let's Dance! 90's Turkish Pop is danceable and positive in valence. {data-commentary-width=300}
+### Can we characterize a 90's Turkish Pop Song by its **timbral characteristics**? Unfortunatelly not. 
 
-
- 
-```{r echo = FALSE, message = FALSE }
-
+```{r}
 library(spotifyr)
 library(tidyverse)
 library(plotly)
 library(patchwork)
 library(compmus)
 
+pranga_zinciri <-
+  get_tidy_audio_analysis("5he9G7I4mwOJ8WHCQpBs0T") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+pranga_zinciri_ceps <-
+pranga_zinciri %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c(option="magma")+
+  ggtitle("Cepstogram of 'Pranga Zinciri' by Ajlan & Mine")
+ 
+ saman_alevi <-
+  get_tidy_audio_analysis("6EUF3q2wCMTYaVMticz3Jz") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+ saman_alevi_ceps <-
+ saman_alevi %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c(option="magma")+
+  ggtitle("Cepstogram of 'Saman Alevi' by Ozon Orhon")
+ 
+ maalesef <-
+  get_tidy_audio_analysis("2Bn3E90Aq8yFcRJDpZdzCo") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+ maalesef_ceps<-
+ maalesef %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c(option="magma")+
+  ggtitle("Cepstogram of 'Maalesef' by Mansur Ark")
+ 
+ pranga_zinciri_ceps 
+ saman_alevi_ceps 
+ maalesef_ceps
+ 
+```
+
+
+***
+After looking at an outlayer last week, this week I am comparing three songs from the corpus which look like belonging to center point. These three songs are similar in higher level features such as danceabilitiy and valence. At that level of danceability and valence we see a clustering which may suggest that those levels are representing a typical 90's Turkish song. What about timbres of these songs? Are they also similar? These three cepstograms show us that rather than a strong component 2 there is no commonality between these three songs. Therefore, we may conclude that what makes them similar is not their timbral characteristics. 
+
+
+
+### Is there a formula of a **90's Turksih Pop Song's Structure**: Two verses, two choruses, one bridge? Unfortunatelly not. 
+
+```{r}
+pranga_zinciri_ssm <-
+pranga_zinciri %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+    theme_minimal() +
+  scale_fill_viridis_c(option="magma")+
+  ggtitle("Self Similarity Matrix of 'Pranga Zinciri' by Ajlan & Mine") +
+  labs(x = "", y = "")
+
+saman_alevi_ssm <-
+  saman_alevi %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+    theme_minimal() +
+  scale_fill_viridis_c(option="magma")+
+  ggtitle("Self Similarity Matrix of 'Saman Alevi' by Ozon Orhon") +
+  labs(x = "", y = "")
+
+maalesef_ssm <-
+  maalesef %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+    theme_minimal() +
+  scale_fill_viridis_c(option="magma")+
+  ggtitle("Self Similarity Matrix of 'Maalesef' by Mansur Ark") +
+  labs(x = "", y = "")
+
+pranga_zinciri_ssm
+saman_alevi_ssm
+maalesef_ssm
+
+```
+
+
+***
+If it is not timbre, can it be their general structure what makes these songs similar is my next question. Can there be a specific combination of verses, choruses and bridges which would define a 90's pop song? No such pattern is visible in these three song that I chose to represent the corpus. What stands out in *Saman ALevi* by Ozon Orhon is homogeneity, on the other hand what stands out for *Maalesef* by Mansur Ark is two novelty points in the song. *Pranga Zinciri* by Ajlan & Mine has the clearest structure which is not visible in the other songs. These differences makes me conclude that it is also not the structure of the song which charactirizes a 90's Pop Song. 
+
+### **Turkish Pop 101**: A quest of what makes **90's Turkish Pop** special.
+ 
+**What makes 90's Turkish Pop special?**
+
+  My corpus is a selection of Turkish pop songs. It consists of 50 pop songs from 90's and 50 pop songs randomly chosen from a pool of 150 pop songs equally representing 80's, 2000's and 2010's. The aim is to compare 90's Turkish pop to the rest of the corpus. This is an interesting comparison because 90's songs are highly distinguishable by their general sound. A person who is familiar with 90's Turkish pop can easily guess whether a Turkish pop song is from 90's or not. People sometimes say "sounds 90's like" to describe new music which shows that there are common characteristics of this corpus. Another aspect which makes this comparison interesting is the increasing popularity of the 90's Turkish pop songs. These songs are more popular today than they were 20 years ago, although more recent or older songs do not show the same pattern of popularity. For example 80's songs did not regain their popularity 20 years after their release. I would like to understand what makes 90's songs different. 
+  
+### **Let's Dance!** 90's Turkish Pop is danceable and positive in valence. {data-commentary-width=300}
+
+
+ 
+```{r echo = FALSE, message = FALSE }
 turkish_pop_eighties<- get_playlist_audio_features("","3COo0d0k5tbgXB35ai0dvh")
 turkish_pop_nineties<- get_playlist_audio_features("", "5b9QmdWinj5f47yUtcjuF0")
 turkish_pop_twothousands<- get_playlist_audio_features("","4RhazifKLE2G9JzzEU1KcQ")
@@ -90,7 +285,7 @@ Second important observation from these graphs is that, 90's songs were more **p
 
  
  
-### What about some interactions? Danceability of songs increase with the valence in the 90's. 
+### What about some interactions? **Danceability** of songs **increase** with the **valence** in the 90's. 
 
 
 ```{r echo = FALSE}
@@ -129,7 +324,7 @@ ggplotly(turkish_pop_interaction_graph)
   This graph shows us an interaction between danceability and valence of 90's songs. More positive songs are more danceable. The same interaction is not observed in the rest of the corpus. A second observation is that there are more major scale songs in the general Turkish pop compared to the 90s. 
    Our first investigation is already giving us clues about why 90's Turkish pop was special and different than the rest of the Turkish pop. Song were more **positive** and more **danceable** in general and as their danceability increased their positive valence also increased.
   
-### Kal Benimle (Stay With Me): A 90's song that is neither danceable, nor positive, nor energetic.
+### **Kal Benimle** (Stay With Me): A 90's song that is neither danceable, nor positive, nor energetic.
 
 ```{r}
 kal_benimle <-
@@ -157,4 +352,4 @@ kal_benimle %>%
 
 ***
 
-Emel Müftüoğlu's *Kal Benimle* from 90's looks like an outlier in terms of danceability, valence and energy; therefore it deserves further investigation. Its chromagram shows prominence of A-sharp and B in the song which suggests that the key of the song may be F-sharp major. A quick google search indicates that emotions of this key are triumph over difficulty, free sigh of relief uttered when hurdles are surmounted; echo of a soul which has fiercely struggled and finally conquered. These emotions are also represented in the lyrics of the song which tells the story of a woman who is finally escaping from this world with a sailing boat. Although very powerful, these emotions cannot easily be transfered by a happy and danceable melody, which explains why this song is an outlier in the 90's Tuskish Pop canon. 
+Emel Müftüoğlu's *Kal Benimle* from 90's looks like an outlier in terms of danceability, valence and energy; therefore it deserves further investigation. Its chromagram shows prominence of A-sharp and B in the song. TBC
