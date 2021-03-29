@@ -1,5 +1,5 @@
 ---
-title: "Computational Musicology Portfolio"
+title: "90's Turkish Pop"
 author: "Ada Örken"
 date: "Spring 2021"
 output: 
@@ -13,135 +13,13 @@ library(tidyverse)
 library(plotly)
 library(patchwork)
 library(compmus)
-```
-
-### Do 90's Turkish Pop songs share a similar **chordical structure**?
-
-```{r}
-circshift <- function(v, n) {
-  if (n == 0) v else c(tail(v, n), head(v, -n))
-}
-
-#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
-major_chord <-
-  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
-minor_chord <-
-  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
-seventh_chord <-
-  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
-
-chord_templates <-
-  tribble(
-    ~name, ~template,
-    "Gb:7", circshift(seventh_chord, 6),
-    "Gb:maj", circshift(major_chord, 6),
-    "Bb:min", circshift(minor_chord, 10),
-    "Db:maj", circshift(major_chord, 1),
-    "F:min", circshift(minor_chord, 5),
-    "Ab:7", circshift(seventh_chord, 8),
-    "Ab:maj", circshift(major_chord, 8),
-    "C:min", circshift(minor_chord, 0),
-    "Eb:7", circshift(seventh_chord, 3),
-    "Eb:maj", circshift(major_chord, 3),
-    "G:min", circshift(minor_chord, 7),
-    "Bb:7", circshift(seventh_chord, 10),
-    "Bb:maj", circshift(major_chord, 10),
-    "D:min", circshift(minor_chord, 2),
-    "F:7", circshift(seventh_chord, 5),
-    "F:maj", circshift(major_chord, 5),
-    "A:min", circshift(minor_chord, 9),
-    "C:7", circshift(seventh_chord, 0),
-    "C:maj", circshift(major_chord, 0),
-    "E:min", circshift(minor_chord, 4),
-    "G:7", circshift(seventh_chord, 7),
-    "G:maj", circshift(major_chord, 7),
-    "B:min", circshift(minor_chord, 11),
-    "D:7", circshift(seventh_chord, 2),
-    "D:maj", circshift(major_chord, 2),
-    "F#:min", circshift(minor_chord, 6),
-    "A:7", circshift(seventh_chord, 9),
-    "A:maj", circshift(major_chord, 9),
-    "C#:min", circshift(minor_chord, 1),
-    "E:7", circshift(seventh_chord, 4),
-    "E:maj", circshift(major_chord, 4),
-    "G#:min", circshift(minor_chord, 8),
-    "B:7", circshift(seventh_chord, 11),
-    "B:maj", circshift(major_chord, 11),
-    "D#:min", circshift(minor_chord, 3)
-  )
-
-pranga_zinciri_chordogram <- get_tidy_audio_analysis("5he9G7I4mwOJ8WHCQpBs0T") %>%
-  compmus_align(bars, segments) %>%
-  select(bars) %>%
-  unnest(bars) %>%
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      )
-  ) %>% 
-  compmus_match_pitch_template(chord_templates, "euclidean", "manhattan") %>%
-  ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
-  ) +
-  geom_tile() +
-  scale_fill_viridis_c(option = "magma") +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "") +
-  ggtitle("Chordogram of 'Pranga Zinciri' by Ajlan & Mine")
-
-saman_alevi_chordogram <- get_tidy_audio_analysis("6EUF3q2wCMTYaVMticz3Jz") %>%
-  compmus_align(bars, segments) %>%
-  select(bars) %>%
-  unnest(bars) %>%
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      )
-  ) %>% 
-  compmus_match_pitch_template(chord_templates, "euclidean", "manhattan") %>%
-  ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
-  ) +
-  geom_tile() +
-  scale_fill_viridis_c(option = "magma") +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "") +
-  ggtitle("Chordogram of 'Saman Alevi' by Ozon Orhon")
-
-maalesef_chordogram <- get_tidy_audio_analysis("2Bn3E90Aq8yFcRJDpZdzCo") %>%
-  compmus_align(bars, segments) %>%
-  select(bars) %>%
-  unnest(bars) %>%
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      )
-  ) %>% 
-  compmus_match_pitch_template(chord_templates, "euclidean", "manhattan") %>%
-  ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
-  ) +
-  geom_tile() +
-  scale_fill_viridis_c(option = "magma") +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "") +
-  ggtitle("Chordogram of 'Maalesef' by Mansur Ark")
-
-pranga_zinciri_chordogram
-saman_alevi_chordogram
-maalesef_chordogram
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
+library(kknn)
 ```
 
 
-***
-
-Chordograms of our three representative songs show that at least **Saman Alevi** and **Pranga Zinciri** have similarities in their chordical structure. These two songs are almost 5 years older than **Maalesef** and may be better candidates for representing 90's Turkish Pop corpus. **Maalesef** may be a transition song from 90's to 2000's. 
 
 ### **Turkish Pop 101**: A quest of what makes **90's Turkish Pop** special.
  
@@ -285,7 +163,7 @@ kal_benimle %>%
 
 ***
 
-Emel Müftüoğlu's *Kal Benimle* from 90's looks like an outlier in terms of danceability, valence and energy; therefore it deserves further investigation. Its chromagram shows prominence of A-sharp and B in the song. TBC
+Emel Müftüoğlu's *Kal Benimle* from 90's looks like an outlier in terms of danceability, valence and energy; therefore it deserves further investigation. Its chromagram shows prominence of A-sharp and B in the song which is in accordance with the key that this song has been written: D-sharp minor. My google search tells me that a D-sharp minor is associated with feelings such as deep distress, dealing with anxiety and existential terror, dark depression. This emotional interpretation may show us why this song is an outlayer. 90's Turkish Pop is mostly consisted of happy, danceable and energetic songs. 
 
 ### Can we characterize a 90's Turkish Pop Song by its **timbral characteristics**? Unfortunatelly not. 
 
@@ -408,6 +286,7 @@ pranga_zinciri %>%
 ```
 
 ***
+
 After looking at an outlayer last week, this week I am comparing three songs from the corpus which look like belonging to center point. These three songs are similar in higher level features such as danceabilitiy and valence. At that level of danceability and valence we see a clustering which may suggest that those levels are representing a typical 90's Turkish song. What about timbres of these songs? Are they also similar? These three cepstograms show us that rather than a strong component 2 there is no commonality between these three songs. Therefore, we may conclude that what makes them similar is not their timbral characteristics. 
 
 
@@ -480,4 +359,357 @@ maalesef_ssm
 
 ***
 If it is not timbre, can it be their general structure what makes these songs similar is my next question. Can there be a specific combination of verses, choruses and bridges which would define a 90's pop song? No such pattern is visible in these three song that I chose to represent the corpus. What stands out in *Saman ALevi* by Ozon Orhon is homogeneity, on the other hand what stands out for *Maalesef* by Mansur Ark is two novelty points in the song. *Pranga Zinciri* by Ajlan & Mine has the clearest structure which is not visible in the other songs. These differences makes me conclude that it is also not the structure of the song which charactirizes a 90's Pop Song. 
+
+### Do 90's Turkish Pop songs share a similar **chordical structure**?
+
+```{r}
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+pranga_zinciri_chordogram <- get_tidy_audio_analysis("5he9G7I4mwOJ8WHCQpBs0T") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  ) %>% 
+  compmus_match_pitch_template(chord_templates, "euclidean", "manhattan") %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "") +
+  ggtitle("Chordogram of 'Pranga Zinciri' by Ajlan & Mine")
+
+saman_alevi_chordogram <- get_tidy_audio_analysis("6EUF3q2wCMTYaVMticz3Jz") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  ) %>% 
+  compmus_match_pitch_template(chord_templates, "euclidean", "manhattan") %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "") +
+  ggtitle("Chordogram of 'Saman Alevi' by Ozon Orhon")
+
+maalesef_chordogram <- get_tidy_audio_analysis("2Bn3E90Aq8yFcRJDpZdzCo") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  ) %>% 
+  compmus_match_pitch_template(chord_templates, "euclidean", "manhattan") %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "") +
+  ggtitle("Chordogram of 'Maalesef' by Mansur Ark")
+
+pranga_zinciri_chordogram
+saman_alevi_chordogram
+maalesef_chordogram
+```
+
+***
+
+Chordograms of our three representative songs show that at least *Saman Alevi* and *Pranga Zinciri* have similarities in their chordical structure. These two songs are almost 5 years older than *Maalesef* and may be better candidates for representing 90's Turkish Pop corpus. *Maalesef* may be a transition song from 90's to 2000's. 
+
+### **90's Pop Songs** do not like big **novelties**!
+
+
+```{r}
+maalesef <-
+  get_tidy_audio_analysis("2Bn3E90Aq8yFcRJDpZdzCo") %>%
+  select(segments) %>%
+  unnest(segments)
+
+maalesef %>%
+  mutate(loudness_max_time = start + loudness_max_time) %>%
+  arrange(loudness_max_time) %>%
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 100) +
+  ylim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty") +
+  ggtitle("Novelty-gram of 'Maalesef' by Mansur Ark")
+
+
+pranga_zinciri <-
+  get_tidy_audio_analysis("5he9G7I4mwOJ8WHCQpBs0T") %>%
+  select(segments) %>%
+  unnest(segments)
+
+pranga_zinciri %>%
+  mutate(loudness_max_time = start + loudness_max_time) %>%
+  arrange(loudness_max_time) %>%
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 100) +
+  ylim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty") +
+  ggtitle("Novelty-gram of 'Pranga Zinciri' by Ajlan & Mine")
+
+saman_alevi <-
+  get_tidy_audio_analysis("6EUF3q2wCMTYaVMticz3Jz") %>%
+  select(segments) %>%
+  unnest(segments)
+
+saman_alevi %>%
+  mutate(loudness_max_time = start + loudness_max_time) %>%
+  arrange(loudness_max_time) %>%
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 100) +
+  ylim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty") +
+  ggtitle("Novelty-gram of 'Saman Alevi' by Ozon Orhon")
+
+
+kal_benimle <-
+  get_tidy_audio_analysis("179Tal0hUlBUG9lorZxffT") %>%
+  select(segments) %>%
+  unnest(segments)
+
+kal_benimle %>%
+  mutate(loudness_max_time = start + loudness_max_time) %>%
+  arrange(loudness_max_time) %>%
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 100) +
+  ylim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty") +
+  ggtitle("Novelty-gram of 'Kal Benimle' by Emel Müftüoğlu")
+
+
+
+
+
+```
+
+***
+
+Here, I compare energy-based novelty functions for my three representative songs of 90's Turkish pop music and the one outlayer. My three representative songs: 'Saman Alevi', 'Pranga Zinciri' and 'Maalesef' show similar patterns with smaller spikes. 'On the other hand, 'Kal Benimle' shows a great variation and greater spikes during the first 100 ms of the song. These four graphs make me conclude that a typical 90's pop song has less novelty in it and more stable. There are not big changes in the energy through-out the songs, they are more stable. 
+
+### Do **90's Turkish Pop Songs** have similar **temporal structure**?
+
+```{r}
+maalesef <-get_tidy_audio_analysis("2Bn3E90Aq8yFcRJDpZdzCo") 
+maalesef_tempogram <-maalesef %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none", option = "magma") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic() +
+  ggtitle("Tempogram of 'Maalesef' by Mansur Ark")
+ 
+
+
+pranga_zinciri <-get_tidy_audio_analysis("5he9G7I4mwOJ8WHCQpBs0T") 
+pranga_zinciri_tempogram <-pranga_zinciri %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none", option = "magma") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic() +
+  ggtitle("Tempogram of 'Pranga Zinciri' by Ajlan & Mine")
+ 
+
+
+saman_alevi <-get_tidy_audio_analysis("6EUF3q2wCMTYaVMticz3Jz") 
+saman_alevi_tempogram <- saman_alevi %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none", option = "magma") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic() +
+  ggtitle("Tempogram of 'Saman Alevi' by Ozon Orhon")
+
+maalesef_tempogram
+pranga_zinciri_tempogram
+saman_alevi_tempogram
+
+```
+
+
+***
+
+Tempograms of my three representative songs show that their tempi are stable throughout the songs. Energy-based novelty functions showed that 90's Turkish pop songs were mostly stable, these tempograms support this idea on temporal level. 
+
+ 
+### Can a **robot** classify a **90's pop song** accurately?  
+
+```{r}
+
+turkish_pop_all_separate <- 
+  bind_rows(
+    turkish_pop_eighties %>% mutate(decade = "80s"),
+    turkish_pop_nineties %>% mutate(decade = "90s"), 
+    turkish_pop_twothousands %>% mutate(decade = "2000s"),
+    turkish_pop_twothousandandtens %>% mutate(decade = "2010s"),
+  )
+
+turkish_pop_features <-
+  turkish_pop_all_separate %>%  # For your portfolio, change this to the name of your corpus.
+  add_audio_analysis() %>% 
+  mutate(
+    playlist_name = factor(playlist_name),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
+
+pop_recipe <-
+  recipe(
+    playlist_name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = turkish_pop_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors()) %>%      # Converts to z-scores.
+  step_range(all_predictors())    # Sets range to [0, 1].
+
+turkish_pop_cv <- turkish_pop_features %>% vfold_cv(5)
+
+knn_model <-
+  nearest_neighbor(neighbors = 1) %>%
+  set_mode("classification") %>%
+  set_engine("kknn")
+turkish_pop_knn <-
+  workflow() %>%
+  add_recipe(pop_recipe) %>%
+  add_model(knn_model) %>%
+  fit_resamples(
+    turkish_pop_cv,
+    control = control_resamples(save_pred = TRUE)
+  )
+
+turkish_pop_knn %>% get_conf_mat()
+
+turkish_pop_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
+
+turkish_pop_knn %>% get_pr()
+
+
+```
+
+***
+
+Taking into account Spotify's track level features, pitch and chroma information, a KNN model was pretty accurate in classifying Turkish 90's pop songs. The recall rates of the model are the highest for 90's song. These findings support my argument that there is something special about 90's Turkish Pop. I mentioned that humans who are familiar with Turkish Pop are usually capable of classifying a 90's song accurately, it turns out that a robot can also do the same! 
+
+### **Outro**: Some final words
+
+My quest of what makes 90's Turkish pop songs special ends here. Throughout this adventure, we discovered that 90's Turkish Pop songs were more danceable and more happy when compared to the rest of the corpus. Historically, this finding makes sense. In the eighties Turkey was dealing with the destruction left from a military coup that happened in the 1980, in the 2000's there was a big economic crisis and 2010's can be characterized by increase of authoritarianism, terrorism and another military coup. Although, 90's had its own share of political and social problems, compared to the other decades, it was a happy period. Therefore, the songs from this decade reflects this atmosphere. 
+
+Chroma, timbre and temporal features were harder to interpret. However, what was nice to see is that when all the features included a KNN model was highly accurate in classifying 90's Turkish Pop Songs. Therefore, although I am not able to define it perfectly what it is, we may conclude that there is something which makes 90's Turkish Pop songs special!
 
