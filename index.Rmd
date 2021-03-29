@@ -17,6 +17,22 @@ library(tidymodels)
 library(ggdendro)
 library(heatmaply)
 library(kknn)
+
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit %>% 
+    collect_predictions() %>% 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit %>% 
+    conf_mat_resampled() %>% 
+    group_by(Prediction) %>% mutate(precision = Freq / sum(Freq)) %>% 
+    group_by(Truth) %>% mutate(recall = Freq / sum(Freq)) %>% 
+    ungroup() %>% filter(Prediction == Truth) %>% 
+    select(class = Prediction, precision, recall)
+} 
 ```
 
 
@@ -694,11 +710,7 @@ turkish_pop_knn <-
     control = control_resamples(save_pred = TRUE)
   )
 
-turkish_pop_knn %>% get_conf_mat()
-
 turkish_pop_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
-
-turkish_pop_knn %>% get_pr()
 
 
 ```
